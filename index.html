@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Expense App</title>
+  <style>
+    :root {
+      --bg-top: #f8efe6;
+      --bg-bottom: #e4efe7;
+      --card: rgba(255, 255, 255, 0.9);
+      --card-border: rgba(120, 110, 96, 0.12);
+      --text-main: #2d2a26;
+      --text-muted: #6a645c;
+      --accent: #1f8f63;
+      --accent-pressed: #18714f;
+      --shadow: 0 18px 40px rgba(71, 58, 43, 0.12);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      color: var(--text-main);
+      background: linear-gradient(180deg, var(--bg-top), var(--bg-bottom));
+      padding: max(18px, env(safe-area-inset-top)) 16px max(24px, env(safe-area-inset-bottom)) 16px;
+    }
+
+    .app-shell {
+      width: 100%;
+      max-width: 460px;
+      margin: 0 auto;
+    }
+
+    h2 {
+      margin: 6px 0 18px;
+      font-size: 30px;
+      line-height: 1.2;
+      text-align: left;
+    }
+
+    .subtitle {
+      margin: 0 0 20px;
+      font-size: 15px;
+      color: var(--text-muted);
+      text-align: left;
+    }
+
+    .input-area,
+    .summary {
+      width: 100%;
+      background: var(--card);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--card-border);
+      border-radius: 22px;
+      box-shadow: var(--shadow);
+    }
+
+    .input-area {
+      padding: 20px 18px;
+      margin-bottom: 16px;
+      text-align: left;
+    }
+
+    .field-label {
+      display: block;
+      margin: 0 0 8px;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .form-grid {
+      display: grid;
+      gap: 14px;
+    }
+
+    input[type="number"],
+    input[type="datetime-local"],
+    select {
+      width: 100%;
+      min-height: 50px;
+      font-size: 17px;
+      padding: 12px 14px;
+      border: 1px solid rgba(120, 110, 96, 0.18);
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.96);
+      color: var(--text-main);
+      appearance: none;
+    }
+
+    button.record-btn {
+      width: 100%;
+      min-height: 52px;
+      font-size: 18px;
+      font-weight: 700;
+      padding: 12px 20px;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: 16px;
+      cursor: pointer;
+      transition: background 0.2s ease, transform 0.2s ease;
+    }
+
+    button.record-btn:hover,
+    button.record-btn:active {
+      background: var(--accent-pressed);
+    }
+
+    .summary {
+      padding: 18px;
+      text-align: left;
+      margin-bottom: 14px;
+    }
+
+    .summary h3 {
+      margin: 0;
+      font-size: 20px;
+      text-align: left;
+    }
+
+    .summary h4 {
+      margin: 8px 0 14px;
+      font-size: 14px;
+      color: var(--text-muted);
+      text-align: left;
+    }
+
+    .month-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin: 8px 0 6px;
+    }
+
+    .month-nav h4 {
+      flex: 1;
+      margin: 0;
+      font-size: 16px;
+      text-align: center;
+      color: var(--text-main);
+    }
+
+    .month-nav-btn {
+      width: 42px;
+      height: 42px;
+      border: none;
+      border-radius: 999px;
+      background: rgba(31, 143, 99, 0.12);
+      color: var(--accent);
+      font-size: 24px;
+      line-height: 1;
+      cursor: pointer;
+    }
+
+    .month-nav-btn:disabled {
+      opacity: 0.35;
+      cursor: default;
+    }
+
+    .month-note {
+      margin: 0 0 10px;
+      font-size: 13px;
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    .summary p {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 0;
+      padding: 10px 0;
+      font-size: 16px;
+      border-bottom: 1px solid rgba(120, 110, 96, 0.1);
+    }
+
+    .summary p span {
+      font-variant-numeric: tabular-nums;
+      font-weight: 600;
+    }
+
+    .summary p:last-child {
+      border-bottom: none;
+    }
+
+    .total {
+      font-weight: 700;
+      font-size: 18px;
+      border-top: 1px solid rgba(120, 110, 96, 0.16);
+      padding-top: 14px;
+      margin-top: 6px;
+    }
+
+    .msg {
+      color: var(--accent);
+      font-size: 14px;
+      min-height: 20px;
+      margin-top: 12px;
+    }
+
+    @media (min-width: 768px) {
+      body {
+        padding-left: 24px;
+        padding-right: 24px;
+      }
+
+      .app-shell {
+        max-width: 980px;
+      }
+
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <h2>📒 我的记账工具</h2>
+    <p class="subtitle">手机上直接记一笔，金额、时间和分类都能快速输入。</p>
+
+    <div class="input-area">
+      <div class="form-grid">
+        <div>
+          <label class="field-label" for="amountInput">金额</label>
+          <input type="number" id="amountInput" placeholder="输入数额 (RM)" min="0" step="0.01">
+        </div>
+        <div>
+          <label class="field-label" for="datetimeInput">时间</label>
+          <input type="datetime-local" id="datetimeInput">
+        </div>
+        <div>
+          <label class="field-label" for="categorySelect">分类</label>
+          <select id="categorySelect">
+            <option value="饮食">🍜 饮食</option>
+            <option value="交通">🚗 交通</option>
+            <option value="购物">🛍️ 购物</option>
+            <option value="娱乐">🎮 娱乐</option>
+            <option value="生活">🏠 生活</option>
+            <option value="其他">📦 其他</option>
+          </select>
+        </div>
+        <button class="record-btn" id="recordBtn" type="button">✅ 记录</button>
+      </div>
+      <div class="msg" id="msg"></div>
+    </div>
+
+    <div class="summary">
+      <h3>🗓️ 月份支出</h3>
+      <div class="month-nav">
+        <button type="button" class="month-nav-btn" id="prevMonthBtn">‹</button>
+        <h4 id="monthLabel">本月</h4>
+        <button type="button" class="month-nav-btn" id="nextMonthBtn">›</button>
+      </div>
+      <p class="month-note" id="monthHint">可查看最近 24 个月</p>
+      <p><span>🍜 饮食</span><span id="cat-饮食">0.00</span></p>
+      <p><span>🚗 交通</span><span id="cat-交通">0.00</span></p>
+      <p><span>🛍️ 购物</span><span id="cat-购物">0.00</span></p>
+      <p><span>🎮 娱乐</span><span id="cat-娱乐">0.00</span></p>
+      <p><span>🏠 生活</span><span id="cat-生活">0.00</span></p>
+      <p><span>📦 其他</span><span id="cat-其他">0.00</span></p>
+      <p class="total"><span id="totalLabel">本月总计</span><span id="total">0.00</span></p>
+    </div>
+  </div>
+
+  <script>
+    const categories = ["饮食", "交通", "购物", "娱乐", "生活", "其他"];
+
+    function twoDigits(value) {
+      return value < 10 ? "0" + value : String(value);
+    }
+
+    function createEmptyMonth() {
+      return { "饮食": 0, "交通": 0, "购物": 0, "娱乐": 0, "生活": 0, "其他": 0 };
+    }
+
+    function mergeMonthData(base, incoming) {
+      const merged = createEmptyMonth();
+      for (const category in base) {
+        merged[category] = base[category];
+      }
+      if (incoming && typeof incoming === "object") {
+        for (const category in incoming) {
+          if (Object.prototype.hasOwnProperty.call(merged, category)) {
+            merged[category] = Number(incoming[category]) || 0;
+          }
+        }
+      }
+      return merged;
+    }
+
+    function getMonthKey(date) {
+      const year = date.getFullYear();
+      const month = twoDigits(date.getMonth() + 1);
+      return year + "-" + month;
+    }
+
+    function getMonthLabel(date) {
+      return date.getFullYear() + "年" + (date.getMonth() + 1) + "月";
+    }
+
+    function addMonths(date, monthOffset) {
+      return new Date(date.getFullYear(), date.getMonth() + monthOffset, 1);
+    }
+
+    function normalizeData(saved) {
+      if (saved && saved.months && typeof saved.months === "object") {
+        for (const monthKey in saved.months) {
+          const monthData = saved.months[monthKey] || {};
+          saved.months[monthKey] = mergeMonthData(createEmptyMonth(), monthData);
+        }
+        if (!Array.isArray(saved.records)) {
+          saved.records = [];
+        }
+        return saved;
+      }
+
+      const migrated = { months: {}, records: [] };
+      const currentMonthKey = getMonthKey(new Date());
+      migrated.months[currentMonthKey] = createEmptyMonth();
+
+      if (saved && typeof saved === "object") {
+        migrated.months[currentMonthKey] = mergeMonthData(createEmptyMonth(), saved);
+      }
+
+      return migrated;
+    }
+
+    function loadExpenseData() {
+      let saved = null;
+      try {
+        saved = localStorage.getItem("expenses");
+      } catch (error) {
+        return { months: {}, records: [] };
+      }
+
+      if (!saved) {
+        return { months: {}, records: [] };
+      }
+
+      try {
+        return normalizeData(JSON.parse(saved));
+      } catch (error) {
+        return { months: {}, records: [] };
+      }
+    }
+
+    function saveExpenseData(expenseData) {
+      try {
+        localStorage.setItem("expenses", JSON.stringify(expenseData));
+        return true;
+      } catch (error) {
+        return false;
+      }
+    }
+
+    function getMonthExpenses(expenseData, monthKey) {
+      if (!expenseData.months[monthKey]) {
+        expenseData.months[monthKey] = createEmptyMonth();
+      }
+      return expenseData.months[monthKey];
+    }
+
+    function sumMonth(expenses) {
+      let total = 0;
+      for (let i = 0; i < categories.length; i += 1) {
+        const category = categories[i];
+        total += expenses[category] || 0;
+      }
+      return total;
+    }
+
+    function formatDateTimeLocal(date) {
+      const year = date.getFullYear();
+      const month = twoDigits(date.getMonth() + 1);
+      const day = twoDigits(date.getDate());
+      const hours = twoDigits(date.getHours());
+      const minutes = twoDigits(date.getMinutes());
+      return year + "-" + month + "-" + day + "T" + hours + ":" + minutes;
+    }
+
+    function parseDateTimeLocal(value) {
+      if (!value || value.indexOf("T") === -1) {
+        return null;
+      }
+
+      const parts = value.split("T");
+      const dateParts = parts[0].split("-");
+      const timeParts = parts[1].split(":");
+
+      if (dateParts.length !== 3 || timeParts.length < 2) {
+        return null;
+      }
+
+      const year = parseInt(dateParts[0], 10);
+      const month = parseInt(dateParts[1], 10);
+      const day = parseInt(dateParts[2], 10);
+      const hour = parseInt(timeParts[0], 10);
+      const minute = parseInt(timeParts[1], 10);
+
+      if (isNaN(year) || isNaN(month) || isNaN(day) || isNaN(hour) || isNaN(minute)) {
+        return null;
+      }
+
+      const parsed = new Date(year, month - 1, day, hour, minute, 0, 0);
+      if (isNaN(parsed.getTime())) {
+        return null;
+      }
+
+      return parsed;
+    }
+
+    function setDefaultDateTime() {
+      const datetimeInput = document.getElementById("datetimeInput");
+      if (!datetimeInput.value) {
+        datetimeInput.value = formatDateTimeLocal(new Date());
+      }
+    }
+
+    function getMonthOffset(date) {
+      return (date.getFullYear() - today.getFullYear()) * 12 + (date.getMonth() - today.getMonth());
+    }
+
+    function getSelectedMonthDate() {
+      return addMonths(today, selectedMonthOffset);
+    }
+
+    function updateMonthNavigation() {
+      const selectedMonthDate = getSelectedMonthDate();
+      const isCurrentMonth = selectedMonthOffset === 0;
+
+      document.getElementById("monthLabel").innerText = getMonthLabel(selectedMonthDate);
+      document.getElementById("monthHint").innerText = isCurrentMonth ? "本月，向左可查看更早月份" : "可查看最近 24 个月";
+      document.getElementById("totalLabel").innerText = (isCurrentMonth ? "本月" : getMonthLabel(selectedMonthDate)) + "总计";
+      document.getElementById("prevMonthBtn").disabled = selectedMonthOffset <= -23;
+      document.getElementById("nextMonthBtn").disabled = selectedMonthOffset >= 0;
+    }
+
+    const today = new Date();
+    let selectedMonthOffset = 0;
+    let expenseData = loadExpenseData();
+
+    function recordExpense() {
+      const amount = parseFloat(document.getElementById("amountInput").value);
+      const dateTimeValue = document.getElementById("datetimeInput").value;
+      const category = document.getElementById("categorySelect").value;
+      const msg = document.getElementById("msg");
+      const selectedDate = parseDateTimeLocal(dateTimeValue);
+
+      if (isNaN(amount) || amount <= 0) {
+        msg.style.color = "red";
+        msg.innerText = "请输入有效数额！";
+        return;
+      }
+
+      if (!selectedDate) {
+        msg.style.color = "red";
+        msg.innerText = "请选择有效时间！";
+        return;
+      }
+
+      if (getMonthOffset(selectedDate) > 0 || getMonthOffset(selectedDate) < -23) {
+        msg.style.color = "red";
+        msg.innerText = "只支持记录最近 24 个月内的月份！";
+        return;
+      }
+
+      const selectedMonthKey = getMonthKey(selectedDate);
+      const selectedMonthExpenses = getMonthExpenses(expenseData, selectedMonthKey);
+      selectedMonthExpenses[category] += amount;
+      expenseData.records.push({
+        amount: amount,
+        category: category,
+        datetime: dateTimeValue
+      });
+      const saveOk = saveExpenseData(expenseData);
+      if (!saveOk) {
+        msg.style.color = "red";
+        msg.innerText = "手机浏览器暂时无法写入资料，请改用 Safari 开启网页再试。";
+        return;
+      }
+      updateSummary();
+
+      document.getElementById("amountInput").value = "";
+  document.getElementById("datetimeInput").value = formatDateTimeLocal(new Date());
+      msg.style.color = "green";
+      msg.innerText = "已记录 " + category + " RM " + amount.toFixed(2) + "，时间：" + dateTimeValue.replace("T", " ");
+      setTimeout(() => msg.innerText = "", 2000);
+    }
+
+    function changeMonth(step) {
+      const nextOffset = selectedMonthOffset + step;
+      if (nextOffset > 0 || nextOffset < -23) {
+        return;
+      }
+
+      selectedMonthOffset = nextOffset;
+      updateSummary();
+    }
+
+    function updateSummary() {
+      const selectedMonthDate = getSelectedMonthDate();
+      const selectedMonthExpenses = getMonthExpenses(expenseData, getMonthKey(selectedMonthDate));
+
+      for (let i = 0; i < categories.length; i += 1) {
+        const category = categories[i];
+        document.getElementById("cat-" + category).innerText = selectedMonthExpenses[category].toFixed(2);
+      }
+
+      document.getElementById("total").innerText = sumMonth(selectedMonthExpenses).toFixed(2);
+      updateMonthNavigation();
+    }
+
+    function initApp() {
+      const recordBtn = document.getElementById("recordBtn");
+      const prevMonthBtn = document.getElementById("prevMonthBtn");
+      const nextMonthBtn = document.getElementById("nextMonthBtn");
+      const msg = document.getElementById("msg");
+
+      if (!recordBtn || !prevMonthBtn || !nextMonthBtn || !msg) {
+        return;
+      }
+
+      recordBtn.onclick = recordExpense;
+      prevMonthBtn.onclick = function () { changeMonth(-1); };
+      nextMonthBtn.onclick = function () { changeMonth(1); };
+
+      setDefaultDateTime();
+      updateSummary();
+    }
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", initApp);
+    } else {
+      initApp();
+    }
+  </script>
+</body>
+</html>
