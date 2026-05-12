@@ -234,6 +234,10 @@
           <input type="datetime-local" id="datetimeInput">
         </div>
         <div>
+          <label class="field-label" for="itemInput">事项</label>
+          <input type="text" id="itemInput" placeholder="输入记账备注，如午餐、打车等">
+        </div>
+        <div>
           <label class="field-label" for="categorySelect">分类</label>
           <select id="categorySelect">
             <option value="饮食">🍜 饮食</option>
@@ -447,6 +451,7 @@
     function recordExpense() {
       const amount = parseFloat(document.getElementById("amountInput").value);
       const dateTimeValue = document.getElementById("datetimeInput").value;
+      const item = document.getElementById("itemInput").value.trim();
       const category = document.getElementById("categorySelect").value;
       const msg = document.getElementById("msg");
       const selectedDate = parseDateTimeLocal(dateTimeValue);
@@ -475,6 +480,7 @@
       expenseData.records.push({
         amount: amount,
         category: category,
+        item: item || category,
         datetime: dateTimeValue
       });
       const saveOk = saveExpenseData(expenseData);
@@ -486,9 +492,10 @@
       updateSummary();
 
       document.getElementById("amountInput").value = "";
-  document.getElementById("datetimeInput").value = formatDateTimeLocal(new Date());
+      document.getElementById("itemInput").value = "";
+      document.getElementById("datetimeInput").value = formatDateTimeLocal(new Date());
       msg.style.color = "green";
-      msg.innerText = "已记录 " + category + " RM " + amount.toFixed(2) + "，时间：" + dateTimeValue.replace("T", " ");
+      msg.innerText = "已记录 " + (item || category) + " RM " + amount.toFixed(2) + "，时间：" + dateTimeValue.replace("T", " ");
       setTimeout(() => msg.innerText = "", 2000);
     }
 
