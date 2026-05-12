@@ -55,6 +55,89 @@ function updateSummary() {
   updateMonthNavigation();
 }
 
+function formatDayLabel(dateString) {
+  const parts = dateString.split("-");
+  return `${parseInt(parts[0], 10)}年${parseInt(parts[1], 10)}月${parseInt(parts[2], 10)}日`;
+}
+
+function formatTimeLabel(dateTimeValue) {
+  return dateTimeValue.indexOf("T") === -1 ? dateTimeValue : dateTimeValue.split("T")[1];
+}
+
+function buildHistoryList() {
+  const historyList = document.getElementById("historyList");
+  if (!historyList) {
+    return;
+  }
+
+  const records = [...expenseData.records].sort((a, b) => b.datetime.localeCompare(a.datetime));
+  historyList.innerHTML = "";
+
+  if (records.length === 0) {
+    historyList.innerHTML = `<div class="history-empty">暂无记录</div>`;
+    return;
+  }
+
+  let currentDate = "";
+  let groupElement = null;
+
+  records.forEach(record => {
+    const recordDate = record.datetime.split("T")[0];
+    if (recordDate !== currentDate) {
+      currentDate = recordDate;
+      groupElement = document.createElement("div");
+      groupElement.className = "history-group";
+
+      const title = document.createElement("div");
+      title.className = "history-group-title";
+      title.innerText = formatDayLabel(recordDate);
+
+      groupElement.appendChild(title);
+      historyList.appendChild(groupElement);
+    }
+
+    const itemElement = document.createElement("div");
+    itemElement.className = "history-item";
+
+    const timeLabel = document.createElement("div");
+    timeLabel.className = "history-item-time";
+    timeLabel.innerText = formatTimeLabel(record.datetime);
+
+    const detailLabel = document.createElement("div");
+    detailLabel.className = "history-item-detail";
+    detailLabel.innerText = `${record.item || record.category} · ${record.category}`;
+
+    const amountLabel = document.createElement("div");
+    amountLabel.className = "history-item-amount";
+    amountLabel.innerText = `RM ${parseFloat(record.amount).toFixed(2)}`;
+
+    itemElement.appendChild(timeLabel);
+    itemElement.appendChild(detailLabel);
+    itemElement.appendChild(amountLabel);
+    groupElement.appendChild(itemElement);
+  });
+}
+
+function setActiveTab(tab) {
+  const homeView = document.getElementById("homeView");
+  const historyView = document.getElementById("historyView");
+  const homeTabBtn = document.getElementById("homeTabBtn");
+  const historyTabBtn = document.getElementById("historyTabBtn");
+
+  if (tab === "history") {
+    homeView.classList.add("hidden");
+    historyView.classList.remove("hidden");
+    homeTabBtn.classList.remove("active");
+    historyTabBtn.classList.add("active");
+    buildHistoryList();
+  } else {
+    homeView.classList.remove("hidden");
+    historyView.classList.add("hidden");
+    homeTabBtn.classList.add("active");
+    historyTabBtn.classList.remove("active");
+  }
+}
+
 function recordExpense() {
   const amount = parseFloat(document.getElementById("amountInput").value);
   const dateTimeValue = document.getElementById("datetimeInput").value;
@@ -105,7 +188,7 @@ function recordExpense() {
   document.getElementById("datetimeInput").value = formatDateTimeLocal(new Date());
   msg.style.color = "green";
   msg.innerText = "已记录 " + (item || category) + " RM " + amount.toFixed(2) + "，时间：" + dateTimeValue.replace("T", " ");
-  setTimeout(() => { msg.innerText = ""; }, 10000);
+  buildHistoryList();
 }
 
 function changeMonth(step) {
@@ -127,12 +210,18 @@ function initApp() {
     return;
   }
 
+  const homeTabBtn = document.getElementById("homeTabBtn");
+  const historyTabBtn = document.getElementById("historyTabBtn");
+
   recordBtn.addEventListener("click", recordExpense);
   prevMonthBtn.addEventListener("click", () => changeMonth(-1));
   nextMonthBtn.addEventListener("click", () => changeMonth(1));
+  homeTabBtn.addEventListener("click", () => setActiveTab("home"));
+  historyTabBtn.addEventListener("click", () => setActiveTab("history"));
 
   setDefaultDateTime();
   updateSummary();
+  setActiveTab("home");
 }
 
 if (document.readyState === "loading") {

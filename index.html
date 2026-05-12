@@ -13,52 +13,66 @@
     <h2>📒 我的记账工具</h2>
     <p class="subtitle">手机上直接记一笔，金额、时间和分类都能快速输入。</p>
 
-    <div class="input-area">
-      <div class="form-grid">
-        <div>
-          <label class="field-label" for="amountInput">金额</label>
-          <input type="number" id="amountInput" placeholder="输入数额 (RM)" min="0" step="0.01">
+    <div id="homeView">
+      <div class="input-area">
+        <div class="form-grid">
+          <div>
+            <label class="field-label" for="amountInput">金额</label>
+            <input type="number" id="amountInput" placeholder="输入数额 (RM)" min="0" step="0.01">
+          </div>
+          <div>
+            <label class="field-label" for="datetimeInput">时间</label>
+            <input type="datetime-local" id="datetimeInput">
+          </div>
+          <div>
+            <label class="field-label" for="itemInput">事项</label>
+            <input type="text" id="itemInput" placeholder="输入记账备注，如午餐、打车等">
+          </div>
+          <div>
+            <label class="field-label" for="categorySelect">分类</label>
+            <select id="categorySelect">
+              <option value="饮食">🍜 饮食</option>
+              <option value="交通">🚗 交通</option>
+              <option value="购物">🛍️ 购物</option>
+              <option value="娱乐">🎮 娱乐</option>
+              <option value="生活">🏠 生活</option>
+              <option value="其他">📦 其他</option>
+            </select>
+          </div>
+          <button class="record-btn" id="recordBtn" type="button">✅ 记录</button>
         </div>
-        <div>
-          <label class="field-label" for="datetimeInput">时间</label>
-          <input type="datetime-local" id="datetimeInput">
-        </div>
-        <div>
-          <label class="field-label" for="itemInput">事项</label>
-          <input type="text" id="itemInput" placeholder="输入记账备注，如午餐、打车等">
-        </div>
-        <div>
-          <label class="field-label" for="categorySelect">分类</label>
-          <select id="categorySelect">
-            <option value="饮食">🍜 饮食</option>
-            <option value="交通">🚗 交通</option>
-            <option value="购物">🛍️ 购物</option>
-            <option value="娱乐">🎮 娱乐</option>
-            <option value="生活">🏠 生活</option>
-            <option value="其他">📦 其他</option>
-          </select>
-        </div>
-        <button class="record-btn" id="recordBtn" type="button">✅ 记录</button>
+        <div class="msg" id="msg"></div>
       </div>
-      <div class="msg" id="msg"></div>
+
+      <div class="summary">
+        <h3>🗓️ 月份支出</h3>
+        <div class="month-nav">
+          <button type="button" class="month-nav-btn" id="prevMonthBtn">‹</button>
+          <h4 id="monthLabel">本月</h4>
+          <button type="button" class="month-nav-btn" id="nextMonthBtn">›</button>
+        </div>
+        <p class="month-note" id="monthHint">可查看最近 24 个月</p>
+        <p><span>🍜 饮食</span><span id="cat-饮食">0.00</span></p>
+        <p><span>🚗 交通</span><span id="cat-交通">0.00</span></p>
+        <p><span>🛍️ 购物</span><span id="cat-购物">0.00</span></p>
+        <p><span>🎮 娱乐</span><span id="cat-娱乐">0.00</span></p>
+        <p><span>🏠 生活</span><span id="cat-生活">0.00</span></p>
+        <p><span>📦 其他</span><span id="cat-其他">0.00</span></p>
+        <p class="total"><span id="totalLabel">本月总计</span><span id="total">0.00</span></p>
+      </div>
     </div>
 
-    <div class="summary">
-      <h3>🗓️ 月份支出</h3>
-      <div class="month-nav">
-        <button type="button" class="month-nav-btn" id="prevMonthBtn">‹</button>
-        <h4 id="monthLabel">本月</h4>
-        <button type="button" class="month-nav-btn" id="nextMonthBtn">›</button>
+    <div id="historyView" class="hidden">
+      <div class="history-header">
+        <h3>📝 支出记录</h3>
       </div>
-      <p class="month-note" id="monthHint">可查看最近 24 个月</p>
-      <p><span>🍜 饮食</span><span id="cat-饮食">0.00</span></p>
-      <p><span>🚗 交通</span><span id="cat-交通">0.00</span></p>
-      <p><span>🛍️ 购物</span><span id="cat-购物">0.00</span></p>
-      <p><span>🎮 娱乐</span><span id="cat-娱乐">0.00</span></p>
-      <p><span>🏠 生活</span><span id="cat-生活">0.00</span></p>
-      <p><span>📦 其他</span><span id="cat-其他">0.00</span></p>
-      <p class="total"><span id="totalLabel">本月总计</span><span id="total">0.00</span></p>
+      <div class="history-list" id="historyList"></div>
     </div>
+  </div>
+
+  <div class="tab-bar">
+    <button class="tab-button active" id="homeTabBtn">首页</button>
+    <button class="tab-button" id="historyTabBtn">记录</button>
   </div>
 
   <script type="module" src="app.js"></script>
