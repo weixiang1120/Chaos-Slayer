@@ -218,10 +218,19 @@ button.record-btn:active {
 }
 
 .history-group-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   margin: 0 0 10px;
   font-size: 15px;
   font-weight: 700;
   color: var(--text-main);
+}
+
+.history-group-total {
+  color: var(--text-main);
+  font-size: 14px;
+  font-weight: 700;
 }
 
 .history-item {
@@ -249,8 +258,7 @@ button.record-btn:active {
 
 .history-item-amount {
   font-size: 15px;
-  font-weight: 700;
-  color: var(--accent);
+  color: var(--text-main);
 }
 
 .history-empty {

@@ -90,8 +90,19 @@ function buildHistoryList() {
 
       const title = document.createElement("div");
       title.className = "history-group-title";
-      title.innerText = formatDayLabel(recordDate);
 
+      const dateLabel = document.createElement("span");
+      dateLabel.innerText = formatDayLabel(recordDate);
+
+      const totalLabel = document.createElement("span");
+      totalLabel.className = "history-group-total";
+      totalLabel.innerText = `合计 RM ${records
+        .filter(item => item.datetime.split("T")[0] === recordDate)
+        .reduce((sum, item) => sum + parseFloat(item.amount || 0), 0)
+        .toFixed(2)}`;
+
+      title.appendChild(dateLabel);
+      title.appendChild(totalLabel);
       groupElement.appendChild(title);
       historyList.appendChild(groupElement);
     }
